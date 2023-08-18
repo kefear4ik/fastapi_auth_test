@@ -52,7 +52,7 @@ async def signup(
         raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                             detail=USER_EXISTS_EXCEPTION.format(email=user_data.email))
     try:
-        await verification_code_service.validate_confirmation_code(email=user_data.email, code=user_data.code)
+        await verification_code_service.validate_verification_code(email=user_data.email, code=user_data.code)
     except ServiceError as exc:
         raise HTTPException(status_code=exc.status_code,
                             detail=str(exc))

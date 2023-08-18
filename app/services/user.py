@@ -18,18 +18,22 @@ from app.services.base import BaseService
 
 
 class UserService(BaseService):
+    """User base service."""
     @staticmethod
     async def get_user_by_login(email: str) -> User | None:
+        """Gets user by email."""
         return await User.filter(email=email).first()
 
     @staticmethod
     async def create_user(email: EmailStr, password: str) -> User:
+        """Creates user with email and hashed password."""
         user = await User.create(email=email,
                                  password=User.get_password_hash(password),
                                  last_login=datetime.datetime.now())
         return user
 
     async def create_token_pair(self, user: User) -> TokenResponse:
+        """Creates access and refresh tokens, adds refresh token to active user refresh tokens list."""
         access_token = create_jwt_token(user_id=user.id,
                                         token_type=JwtTokenTypeEnum.access,
                                         sub=ACCESS_TOKEN_SUB,
@@ -46,6 +50,7 @@ class UserService(BaseService):
 
     @atomic()
     async def signup(self, user_data: UserSignup) -> TokenResponse:
+        """Signup user and cleans user verification codes."""
         user = await self.create_user(email=user_data.email, password=user_data.password)
         token_pair = await self.create_token_pair(user=user)
         await VerificationCode.filter(email=user.email).delete()
@@ -53,6 +58,7 @@ class UserService(BaseService):
         return token_pair
 
     async def signin(self, user_data: UserSignin) -> TokenResponse:
+        """Signin user using email and password."""
         user = await self.get_user_by_login(email=user_data.email)
         if not user:
             raise UserServiceError(
@@ -69,6 +75,7 @@ class UserService(BaseService):
         return token_pair
 
     async def check_access_token_blacklisted(self, access_token_id: str) -> None:
+        """Checks access token saved as blacklisted."""
         token = await self.storage.get(key=access_token_id)
         if token is not None:
             raise HTTPException(status_code=400, detail="Inactive access token!")
@@ -79,6 +86,7 @@ class UserService(BaseService):
         return None
 
     async def check_refresh_token_is_active(self, user_id: int, access_token_id: str) -> None:
+        """Checks refresh token in user refresh tokens list."""
         token_is_active = await self.storage.value_in_set(key=f'user-refresh-{user_id}', value=access_token_id)
         if not token_is_active:
             raise HTTPException(status_code=400, detail="Inactive refresh token!")
@@ -93,11 +101,13 @@ class UserService(BaseService):
         return None
 
     async def logout(self, user_id: int, access_token_id: str) -> None:
+        """Logout user. Deletes all user active refresh tokens. Adds access token to blacklist."""
         await self.add_access_token_to_blacklist(access_token_id=access_token_id)
         await self.clean_user_refresh_token_list(user_id=user_id)
         return None
 
     async def refresh_token_pair(self, user: User, access_token_id: str) -> TokenResponse:
+        """Creates new access-refresh token pair and deletes old refresh token."""
         await self.delete_user_refresh_token(user_id=user.id, access_token_id=access_token_id)
         token_pair = await self.create_token_pair(user=user)
         return token_pair

@@ -10,6 +10,7 @@ from app.core.config import settings
 
 
 class EmailService:
+    """Email base service."""
     VERIFICATION_EMAIL_SUBJECT = 'Verification'
     SUCCESS_SIGNUP_EMAIL_SUBJECT = 'Success registration'
 
@@ -29,6 +30,7 @@ class EmailService:
         self.fast_mail = FastMail(self.connection_config)
 
     async def send_verification_email(self, email: str, code: int) -> None:
+        """Sends verification email to user."""
         message = MessageSchema(
             subject=self.VERIFICATION_EMAIL_SUBJECT,
             recipients=[email],
@@ -38,6 +40,7 @@ class EmailService:
         await self.fast_mail.send_message(message, template_name='verification_email.html')
 
     async def send_success_signup_email(self, email: str, password: str) -> None:
+        """Sends success email to user with password after oauth2 flow signup."""
         message = MessageSchema(
             subject=self.SUCCESS_SIGNUP_EMAIL_SUBJECT,
             recipients=[email],

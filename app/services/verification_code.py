@@ -16,12 +16,15 @@ from app.models.db import VerificationCode
 
 
 class VerificationCodeService:
+    """Verification code base service."""
     @staticmethod
     async def get_verification_code(code: int) -> VerificationCode | None:
+        """Gets unexpired verification code."""
         return await VerificationCode.filter(code=code, expiration_at__gt=datetime.now()).first()
 
     @classmethod
-    async def validate_confirmation_code(cls, email: EmailStr, code: int) -> VerificationCode:
+    async def validate_verification_code(cls, email: EmailStr, code: int) -> VerificationCode:
+        """Validates verification code and user email."""
         verification_code = await cls.get_verification_code(code=code)
         if not verification_code:
             raise VerificationCodeServiceError(
@@ -37,6 +40,7 @@ class VerificationCodeService:
 
     @staticmethod
     async def create_verification_code(email: EmailStr, code_expiration: timedelta) -> VerificationCode:
+        """Creates verification code with uniq code number."""
         attempts = 10
         while attempts:
             code = random_with_n_digits(settings.VERIFICATION_CODE_LENGTH)
@@ -56,6 +60,7 @@ class VerificationCodeService:
 
     @classmethod
     async def send_verification_code(cls, email: EmailStr) -> None:
+        """Creates and sends verification code via email."""
         verification_code = await cls.create_verification_code(
             email=email,
             code_expiration=settings.VERIFICATION_CODE_EXPIRATION_DELTA,
