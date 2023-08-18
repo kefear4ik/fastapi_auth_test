@@ -11,7 +11,6 @@ from tortoise.models import Model
 
 from app.models.db.base import AbstractDates
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -32,6 +31,9 @@ class User(Model):
         app = 'user'
         table = 'user_user'
 
+    def __str__(self) -> str:
+        return f'User(id={self.id}, email={self.email}, is_active={self.is_active})'
+
     def to_dict(self) -> Dict:
         return {
             'id': self.id,  # type: ignore # noqa
@@ -43,14 +45,17 @@ class User(Model):
 
     @classmethod
     def verify_password(cls, plain_password: str, hashed_password: str) -> bool:
+        """Verifies password with stores hash."""
         return pwd_context.verify(plain_password, hashed_password)
 
     @classmethod
     def get_password_hash(cls, password: str) -> str:
+        """Gets hash for plain password."""
         return pwd_context.hash(password)
 
 
 class VerificationCode(AbstractDates):
+    """User verification code."""
     id = fields.IntField(pk=True)
     email = fields.CharField(max_length=255, unique=True)
     code = fields.IntField(unique=True)
@@ -59,3 +64,6 @@ class VerificationCode(AbstractDates):
     class Meta:
         app = 'user'
         table = 'verification_code'
+
+    def __str__(self) -> str:
+        return f'VerificationCode(email={self.email}, code={self.code}, expiration_at={self.expiration_at})'
