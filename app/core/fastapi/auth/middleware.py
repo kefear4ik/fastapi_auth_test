@@ -5,9 +5,9 @@ __all__ = (
 import logging
 from calendar import timegm
 
-import jwt
 from fastapi.security import HTTPBearer
 from fastapi.security.utils import get_authorization_scheme_param
+import jwt
 from jwt import InvalidIssuedAtError, ExpiredSignatureError
 from starlette.authentication import (
     AuthCredentials,

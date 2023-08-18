@@ -1,5 +1,7 @@
 import logging
+
 from asgiref.sync import async_to_sync
+
 from app.core.celery import celery_app
 
 

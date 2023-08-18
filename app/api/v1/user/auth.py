@@ -13,9 +13,9 @@ from app.depends import get_services
 from app.models.api.auth import TokenResponse
 from app.models.api.base import SuccessResponse
 from app.models.api.user import EmailRegistration, UserSignup, UserSignin
+from app.models.db.user import User
 from app.services.user import UserService
 from app.services.verification_code import VerificationCodeService
-from app.models.db.user import User
 
 
 user_auth_router = APIRouter()

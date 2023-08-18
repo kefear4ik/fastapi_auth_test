@@ -1,10 +1,10 @@
-from typing import Dict
-
-from starlette.authentication import BaseUser
-
 __all__ = (
     'CustomUser',
 )
+
+from typing import Dict
+
+from starlette.authentication import BaseUser
 
 
 class CustomUser(BaseUser):

@@ -1,5 +1,6 @@
 __all__ = (
     'email_service',
+    'EmailService',
 )
 
 from pathlib import Path

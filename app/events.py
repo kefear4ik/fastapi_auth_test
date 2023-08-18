@@ -5,7 +5,7 @@ from app import depends
 from app.core.config import settings
 from app.core.fastapi.auth.jwt.keys import generate_jwt_keys
 from app.core.storage import RedisStorage
-from app.services.user import UserService
+from app.services import UserService, EmailService
 from app.services.verification_code import VerificationCodeService
 
 
@@ -41,10 +41,12 @@ async def init_services():
     redis_storage = RedisStorage(depends.redis)
     user_service = UserService(storage=redis_storage)
     verification_code_service = VerificationCodeService
+    email_service = EmailService()
 
     depends.services = {
         'user_service': user_service,
         'verification_code_service': verification_code_service,
+        'email_service': email_service,
     }
 
 

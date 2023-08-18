@@ -1,10 +1,9 @@
+__all__ = ('login_required',)
+
 import functools
 
 from fastapi import HTTPException, status
 from starlette.requests import Request
-
-
-__all__ = ('login_required',)
 
 
 def is_auth_user(request: Request) -> bool:
