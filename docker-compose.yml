@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+
+  redis:
+    image: redis:latest
+    hostname: redis
+    restart: "always"
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
+    networks:
+      - fastapi_auth_test
+    ports:
+      - ${REDIS_LISTEN_PORT}:${REDIS_LISTEN_PORT}
+    volumes:
+      - redis:${REDIS_DATA}
+    env_file: docker-compose-env/redis.env
+
+  app:
+    build:
+      context: .
+    image: ${SERVICE_IMAGE}
+    volumes:
+      - jwt_keys:/var/app/jwt_keys
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    networks:
+      - fastapi_auth_test
+    depends_on:
+      - redis
+    env_file: docker-compose-env/app.env
+
+  celery-worker:
+    build:
+      context: .
+    command: celery -A app.core worker -l info
+    networks:
+      - fastapi_auth_test
+    depends_on:
+      - redis
+      - app
+    env_file: docker-compose-env/app.env
+
+networks:
+  fastapi_auth_test:
+    driver: bridge
+
+volumes:
+  redis:
+  jwt_keys:
